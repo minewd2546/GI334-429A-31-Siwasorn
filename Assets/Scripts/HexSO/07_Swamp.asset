@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2b6fc634f8f4399930bb2fefa72533b, type: 3}
+  m_Name: 07_Swamp
+  m_EditorClassIdentifier: Assembly-CSharp::HexData
+  hexName: Swamp
+  type: 7
+  terrainSprites:
+  - {fileID: 21300000, guid: 494a1e112ab821740ad5508b752fb953, type: 3}
+  - {fileID: 21300000, guid: 8b4a8f0fde8face4b90d1592642aab06, type: 3}
+  - {fileID: 21300000, guid: fc8ac03c4cff83d46ae3218fb3399bd2, type: 3}
+  - {fileID: 21300000, guid: c48dac4606330dd45822c246c3421aef, type: 3}
+  forestSprites:
+  - {fileID: 21300000, guid: 2e1c9fb7ff0891645bc0a5b7ea9efdc6, type: 3}
+  - {fileID: 21300000, guid: 6753a040066c6f74092185e53c71da42, type: 3}
+  - {fileID: 21300000, guid: cab25e357eef3d449a02e4fe98b3022d, type: 3}
+  - {fileID: 21300000, guid: e17b8a148a198744b9dbff3e8e0472a5, type: 3}
+  resourceYield: 
+  moveCost: 2

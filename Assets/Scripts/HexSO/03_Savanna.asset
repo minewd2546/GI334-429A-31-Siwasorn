@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2b6fc634f8f4399930bb2fefa72533b, type: 3}
+  m_Name: 03_Savanna
+  m_EditorClassIdentifier: Assembly-CSharp::HexData
+  hexName: Savanna
+  type: 3
+  terrainSprites:
+  - {fileID: 21300000, guid: 3d21c1125aea6c94e8f7a7871fb70a73, type: 3}
+  - {fileID: 21300000, guid: d4325b7ef3e73164eadaeeb4b614ecb1, type: 3}
+  - {fileID: 21300000, guid: 96fe6873388382048895e38031e66be6, type: 3}
+  - {fileID: 21300000, guid: da48dc8b24ca43245ba495c2427ca2c2, type: 3}
+  forestSprites:
+  - {fileID: 21300000, guid: ec2ad05803ed9b947af6c1fd6938d96e, type: 3}
+  - {fileID: 21300000, guid: b020015d185fdf14db3882bab90913f5, type: 3}
+  - {fileID: 21300000, guid: 1fc5d94101b31a34b86e300b5917a1b0, type: 3}
+  - {fileID: 21300000, guid: 5d993eec73c3f014eb5478469a970a25, type: 3}
+  resourceYield: 
+  moveCost: 1

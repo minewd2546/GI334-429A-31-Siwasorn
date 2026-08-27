@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2b6fc634f8f4399930bb2fefa72533b, type: 3}
+  m_Name: 06_Desert
+  m_EditorClassIdentifier: Assembly-CSharp::HexData
+  hexName: Desert
+  type: 6
+  terrainSprites:
+  - {fileID: 21300000, guid: a120f9ea35b3668468cb91e7d7d5924f, type: 3}
+  - {fileID: 21300000, guid: 68160d681d3b9e144a7605161361443a, type: 3}
+  - {fileID: 21300000, guid: a50aa4e0ae6d3ca4fae63110a3c4d315, type: 3}
+  - {fileID: 21300000, guid: 70c2c81d807653c47b5b5247be87ae1d, type: 3}
+  forestSprites:
+  - {fileID: 21300000, guid: c4eaf06ea15a3ca41ab20e73391bebc3, type: 3}
+  - {fileID: 21300000, guid: e03ee3305eb621943ae33a01d3447b95, type: 3}
+  - {fileID: 21300000, guid: b7773c8e8b0032e4f9e6c4930fb2e24d, type: 3}
+  - {fileID: 21300000, guid: 03604a8dea34c174694205d57171503f, type: 3}
+  resourceYield: 
+  moveCost: 1
