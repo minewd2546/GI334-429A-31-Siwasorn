@@ -1,0 +1,161 @@
+fileFormatVersion: 2
+guid: 9c2f92697cfe7534bb55a141efbce62d
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4011033427267745434
+    second: conifer_forest_0
+  - first:
+      213: 2883361596985501632
+    second: conifer_forest_1
+  - first:
+      213: -6366321734332826262
+    second: conifer_forest_2
+  - first:
+      213: -2341248480315595557
+    second: conifer_forest_3
+  - first:
+      213: 7500206377732722817
+    second: conifer_forest_4
+  - first:
+      213: -3530166108868574091
+    second: conifer_forest_5
+  - first:
+      213: 8850189977117369528
+    second: conifer_forest_6
+  - first:
+      213: -7773621125248596595
+    second: conifer_forest_7
+  - first:
+      213: 8323373017791850172
+    second: conifer_forest_8
+  - first:
+      213: 4797912628701888259
+    second: conifer_forest_9
+  - first:
+      213: 5675685187689764306
+    second: conifer_forest_10
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.47265625}
+  spritePixelsToUnits: 75.91241
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      conifer_forest_0: -4011033427267745434
+      conifer_forest_1: 2883361596985501632
+      conifer_forest_10: 5675685187689764306
+      conifer_forest_2: -6366321734332826262
+      conifer_forest_3: -2341248480315595557
+      conifer_forest_4: 7500206377732722817
+      conifer_forest_5: -3530166108868574091
+      conifer_forest_6: 8850189977117369528
+      conifer_forest_7: -7773621125248596595
+      conifer_forest_8: 8323373017791850172
+      conifer_forest_9: 4797912628701888259
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
