@@ -213,6 +213,7 @@ GameObject:
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
   - component: {fileID: 519420033}
+  - component: {fileID: 519420034}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -353,6 +354,22 @@ MonoBehaviour:
   moveSpeed: 10
   zoomSpeed: 5
   zoomModifier: 0
+--- !u!114 &519420034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56666c5a40171f54783dd416a44f42bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.Physics2DRaycaster
+  m_EventMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_MaxRayIntersections: 0
 --- !u!1 &547798074
 GameObject:
   m_ObjectHideFlags: 0
@@ -521,7 +538,7 @@ MonoBehaviour:
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 0000000025b23fc0798a4d6cd2e84547
+  m_ApplyToSortingLayers: 0000000025b23fc0c1fe6c30798a4d6cd2e84547
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -565,7 +582,11 @@ MonoBehaviour:
         m_SelectedSource:
           rid: -2
         m_Provider2DCache:
-          rid: -2
+          rid: 6953177557434105958
+    - rid: 6953177557434105958
+      type: {class: 'Provider2DCache`1[[UnityEngine.Rendering.Universal.Light2DProvider, Unity.RenderPipelines.Universal.2D.Runtime]]', ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.2D.Runtime}
+      data:
+        m_Cache: []
 --- !u!4 &619394802
 Transform:
   m_ObjectHideFlags: 0
@@ -904,6 +925,31 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 96f3185a0339d3e4eb7eecd5d9c5feab, type: 2}
   - {fileID: 11400000, guid: da2c99eec7d3cb144aa50ad0ecc31e91, type: 2}
   - {fileID: 11400000, guid: f4bdac100322bdd44828cd009f5f9ed6, type: 2}
+  landUnitPrefab: {fileID: 7514744244696288195, guid: 42c21dc1cb451834a98fc827a79c1072, type: 3}
+  navalUnitPrefab: {fileID: 1545837204029010159, guid: 2f70ad153175402458a4bec2a3960e9b, type: 3}
+  townPrefab: {fileID: 0}
+  curUnit: {fileID: 0}
+  curAiUnit: {fileID: 0}
+  landUnitData:
+  - {fileID: 11400000, guid: 0bba1063c57c59742ab3a4c5c4a9b05e, type: 2}
+  - {fileID: 11400000, guid: d2b6452c3eb9f1d479028184bf9a559d, type: 2}
+  - {fileID: 11400000, guid: d3a60e674e979924ab38bd9f091a9755, type: 2}
+  - {fileID: 11400000, guid: ba6309fb75348c540ae170cc8f330b25, type: 2}
+  - {fileID: 11400000, guid: 6bf6b9ad4daa81b44937c0212473a43a, type: 2}
+  - {fileID: 11400000, guid: 9e2164c027fed484cbbb18511b477ac1, type: 2}
+  - {fileID: 11400000, guid: fd6cb63deeda2aa4ab3ad901dd160bd6, type: 2}
+  - {fileID: 11400000, guid: 6ca69d6049c644c458516e2206c28ecb, type: 2}
+  - {fileID: 11400000, guid: d2504afd2362dad45b50543d7f292fe4, type: 2}
+  - {fileID: 11400000, guid: b7864fdb30807fa46be79c43d6a7bd4c, type: 2}
+  - {fileID: 11400000, guid: cf563a7f77ad6e549be7ad4f1dd62b8a, type: 2}
+  - {fileID: 11400000, guid: daa18d133948f7a47af225637b57dfa7, type: 2}
+  navalUnitData:
+  - {fileID: 11400000, guid: 561a1f864681ebc4bbcf53e3369fb732, type: 2}
+  - {fileID: 11400000, guid: 1fa94fb7f44159646b348c0de8c6200f, type: 2}
+  - {fileID: 11400000, guid: 1893a5cf381278e4380069556cebda32, type: 2}
+  - {fileID: 11400000, guid: 87bd3a3864ac8124d81a966122c1d6b4, type: 2}
+  - {fileID: 11400000, guid: b82e537a1538aa64eaf691460e710a5c, type: 2}
+  - {fileID: 11400000, guid: cda5a9c60d24dc3438412f1ea3b74056, type: 2}
 --- !u!4 &1222698438
 Transform:
   m_ObjectHideFlags: 0
@@ -1156,6 +1202,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d989cb2e510746b0ae5369acdc9647ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Faction
+--- !u!1 &1673888675
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1673888676}
+  m_Layer: 0
+  m_Name: LandUnit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1673888676
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1673888675}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2123577647
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1248,3 +1325,4 @@ SceneRoots:
   - {fileID: 1067931990}
   - {fileID: 1222698438}
   - {fileID: 626479796}
+  - {fileID: 1673888676}

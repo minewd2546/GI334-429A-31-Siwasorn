@@ -60,6 +60,31 @@ public class GameManager : MonoBehaviour
     private FactionData[] factionData;
     public FactionData[] FactionData { get { return factionData; } }
 
+    [SerializeField]
+    private GameObject landUnitPrefab;
+
+    [SerializeField]
+    private GameObject navalUnitPrefab;
+
+    [SerializeField]
+    private GameObject townPrefab;
+
+    [SerializeField]
+    private Unit curUnit;
+    public Unit CurUnit { get { return curUnit; } set { curUnit = value; } }
+
+    [SerializeField]
+    private Unit curAiUnit;
+    public Unit CurAiUnit { get { return curAiUnit; } set { curAiUnit = value; } }
+
+    [SerializeField]
+    private LandUnitData[] landUnitData;
+    public LandUnitData[] LandUnitData { get { return landUnitData; } }
+
+    [SerializeField]
+    private NavalUnitData[] navalUnitData;
+    public NavalUnitData[] NavalUnitData { get { return navalUnitData; } }
+
     public static GameManager instance;
 
     void Awake()
@@ -71,9 +96,15 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         SetUpFaction();
+        SelectPlayerFaction();
 
         DetermineOcean();
         GenerateAllHexes();
+
+        GenerateAllEuropeanShips();
+        GenerateAllEuropeanExplorerUnits();
+
+        FocusStartingUnit();
     }
 
     // Update is called once per frame
@@ -81,6 +112,9 @@ public class GameManager : MonoBehaviour
     {
         if (Keyboard.current.iKey.wasPressedThisFrame)
             ToggleHexText();
+
+        if (Keyboard.current.tabKey.wasPressedThisFrame)
+            SelectNextPlayerUnit();
     }
 
     private void DetermineOcean()
@@ -182,6 +216,180 @@ public class GameManager : MonoBehaviour
         {
             factions[i].FactionInit(factionData[i]);
         }
+    }
+
+    public void SelectPlayerFaction()
+    {
+        int i = 0; //England
+        playerFaction = factions[i];
+    }
+
+    private void GenerateEuropeanShip(Faction faction)
+    {
+        int x = WIDTH - 1; //near right edge of a map
+        int y = Random.Range(0, HEIGHT);
+        Hex hex = allHexes[x, y];
+
+        GameObject obj = Instantiate(navalUnitPrefab, hex.Pos, Quaternion.identity, faction.UnitParent);
+        NavalUnit ship = obj.GetComponent<NavalUnit>();
+
+        ship.UnitInit(this, faction, navalUnitData[0]); //Caravel
+        ship.SetupPosition(hex);
+        faction.Units.Add(ship); //First Unit of European nations is a ship
+    }
+
+    private void GenerateAllEuropeanShips()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            GenerateEuropeanShip(factions[i]);
+        }
+    }
+
+    private void GeneratePassengerUnit(Faction faction, Hex hex, int unitId, bool show, NavalUnit ship)//ship passengers
+    {
+        GameObject obj = Instantiate(landUnitPrefab, hex.Pos, Quaternion.identity, ship.PassengerParent.transform);
+        LandUnit unit = obj.GetComponent<LandUnit>();
+
+        unit.UnitInit(this, faction, landUnitData[unitId]);
+        unit.SetupPosition(hex);
+
+        unit.UnitStatus = UnitStatus.OnBoard;
+        obj.SetActive(false);
+
+        faction.Units.Add(unit);
+        ship.Passengers.Add(unit);
+    }
+
+    private void GenerateAllEuropeanExplorerUnits()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            NavalUnit firstShip = factions[i].Units[0].gameObject.GetComponent<NavalUnit>();
+
+            GeneratePassengerUnit(factions[i], firstShip.CurHex, 1, false, firstShip); //Veteran Soldiers
+            GeneratePassengerUnit(factions[i], firstShip.CurHex, 2, false, firstShip); //Hardy Pioneers
+        }
+    }
+
+    public void ShowToggleBorder(Unit unit)
+    {
+        if (unit.Faction == playerFaction)
+            unit.ToggleBorder(true, Color.green);
+        else
+            unit.ToggleBorder(true, Color.red);
+    }
+
+    public void ClearToggleBorder(Unit unit)
+    {
+        unit.ToggleBorder(false, Color.green);
+    }
+
+    public void FocusPlayerUnit(Unit unit)
+    {
+        ShowToggleBorder(unit);
+    }
+
+    public bool CheckIfHexIsAdjacent(Hex centerHex, Hex targetHex)
+    {
+        List<Hex> adjHexes = HexCalculator.GetHexAround(allHexes, centerHex);
+
+        return (adjHexes.Contains(targetHex)) ? true : false;
+    }
+
+    public void ClearDarkFogAroundUnit(Unit unit)
+    {
+        unit.CurHex.DiscoverHex();
+
+        List<Hex> adjHexes = HexCalculator.GetHexAround(allHexes, unit.CurHex);
+
+        //Debug.Log(adjHexes.Count);
+
+        foreach (Hex hex in adjHexes)
+        {
+            hex.DiscoverHex();
+        }
+    }
+
+    public void LeaveSeenFogAroundUnit(Unit unit)
+    {
+        unit.CurHex.SeenHex();
+
+        List<Hex> adjHexes = HexCalculator.GetHexAround(allHexes, unit.CurHex);
+
+        //Debug.Log(adjHexes.Count);
+
+        foreach (Hex hex in adjHexes)
+        {
+            hex.SeenHex();
+        }
+    }
+
+    public void ClearDarkFogAroundEveryUnit(Faction faction)
+    {
+        foreach (Unit unit in faction.Units)
+        {
+            //Debug.Log($"{unit.UnitName} discovers:");
+            ClearDarkFogAroundUnit(unit);
+        }
+    }
+
+    public void SelectPlayerUnit(Unit unit)
+    {
+        if (curUnit != null)
+        {
+            ClearToggleBorder(curUnit);
+
+            if (curUnit.UnitStatus == UnitStatus.OnBoard)
+                curUnit.gameObject.SetActive(false);
+        }
+
+        unit.gameObject.SetActive(true);
+
+        curUnit = unit;
+        //UpdateCanGoHex();
+
+        FocusPlayerUnit(curUnit);
+        //Debug.Log(curUnit);
+    }
+
+    private void FocusStartingUnit()
+    {
+        if (playerFaction.Units.Count == 0)
+            return;
+
+        //open the fog the player's own ship is sitting under, so it is visible on turn 1
+        ClearDarkFogAroundEveryUnit(playerFaction);
+
+        SelectPlayerUnit(playerFaction.Units[0]);
+        CameraController.instance.MoveCamera(curUnit.transform.position);
+    }
+
+    private int FindIndexOfCurUnit()
+    {
+        if (playerFaction.Units.Contains(curUnit))
+        {
+            for (int i = 0; i < playerFaction.Units.Count; i++)
+            {
+                if (curUnit == playerFaction.Units[i])
+                    return i;
+            }
+            return -1;
+        }
+        else
+            return -1;
+    }
+
+    private void SelectNextPlayerUnit()
+    {
+        int i = FindIndexOfCurUnit();
+        i++;
+
+        if (i >= playerFaction.Units.Count)
+            i = 0;
+
+        SelectPlayerUnit(playerFaction.Units[i]);
+        CameraController.instance.MoveCamera(curUnit.transform.position);
     }
 
     private void ToggleHexText()
