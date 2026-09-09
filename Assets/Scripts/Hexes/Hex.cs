@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -38,9 +39,11 @@ public class Hex : MonoBehaviour, IPointerClickHandler
     [Header("Basic")]
     [SerializeField]
     private SpriteRenderer terrainSprite;
+    public SpriteRenderer TerrainSprite { get { return terrainSprite; } }
 
     [SerializeField]
     private SpriteRenderer forestSprite;
+    public SpriteRenderer ForestSprite { get { return forestSprite; } }
 
     [Header("Fog of War")]
     [SerializeField]
@@ -69,6 +72,22 @@ public class Hex : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private bool specialHex;
     public bool SpecialHex { get { return specialHex; } set { specialHex = value; } }
+
+    [SerializeField]
+    private Town town;
+    public Town Town { get { return town; } set { town = value; } }
+
+    [SerializeField]
+    private List<Unit> unitsInHex = new List<Unit>();
+    public List<Unit> UnitsInHex { get { return unitsInHex; } set { unitsInHex = value; } }
+
+    [SerializeField]
+    private Unit labor;
+    public Unit Labor { get { return labor; } set { labor = value; } }
+
+    [SerializeField]
+    private int yieldId = -1; //current ID of resource yield that labor is working
+    public int YieldID { get { return yieldId; } set { yieldId = value; } }
 
     [Header("Town")]
     [SerializeField]

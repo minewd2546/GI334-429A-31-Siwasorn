@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 public enum UnitType
 {
@@ -13,7 +14,9 @@ public enum UnitStatus
     OnBoard,
     Fortified,
     Clearing,
-    Building
+    Building,
+    WorkInField,
+    WorkInTown
 }
 
 public class Unit : MonoBehaviour, IPointerClickHandler
@@ -73,6 +76,7 @@ public class Unit : MonoBehaviour, IPointerClickHandler
     [Header("Unit")]
     [SerializeField]
     protected SpriteRenderer unitSprite;
+    public SpriteRenderer UnitSprite { get { return unitSprite; } }
 
     [Header("Flag")]
     [SerializeField]
@@ -94,10 +98,28 @@ public class Unit : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // the manual uses Input.GetMouseButtonDown(1); this project is on the new Input System
+    public void OnMouseOver()
+    {
+        if (Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            if (gameMgr.CheckIfHexIsAdjacent(gameMgr.CurUnit.CurHex, curHex))
+            {
+                if (faction == gameMgr.PlayerFaction)//same side unit
+                    gameMgr.CurUnit.PrepareMoveToHex(curHex);
+                else//diff side unit
+                    Debug.Log($"{gameMgr.CurUnit} Attacks {unitName}");
+            }
+        }
+    }
+
     public void SetupPosition(Hex hex)
     {
         curHex = hex;
         curPos = hex.Pos;
+
+        if (!curHex.UnitsInHex.Contains(this))
+            curHex.UnitsInHex.Add(this);
     }
 
     public void ToggleBorder(bool flag, Color32 color)
@@ -151,10 +173,16 @@ public class Unit : MonoBehaviour, IPointerClickHandler
 
     protected virtual void StayOnHex(Hex targetHex)
     {
+        //Old Hex
+        curHex.UnitsInHex.Remove(this);
+
         isMoving = false;
         curHex = targetHex;
         this.targetHex = null;
         transform.position = curHex.transform.position; //confirm position to match this hex
+
+        //New Hex
+        curHex.UnitsInHex.Add(this);
 
         if (faction == gameMgr.PlayerFaction)
         {
