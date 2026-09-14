@@ -56,6 +56,31 @@ public class TerrainSlot : MonoBehaviour, IDropHandler
         uiMgr = UIManager.instance;
     }
 
+
+    // The terrain art comes in two shapes: the new set is 256x256, the older pack
+    // 256x384. Stretching both into one fixed rect makes them different sizes and
+    // heights. Sprite pivot + pixelsPerUnit already mark the hex face (every hex is
+    // HEX_WORLD_W units across, pivot at the face centre), so size and offset each
+    // image from those instead.
+    const float HEX_WORLD_W = 2.74f;   // must match the world map
+    const float FACE_PX = 150f;        // how wide a hex face should be in this panel
+
+    private static void FitHexImage(Image img, Sprite sprite)
+    {
+        if (img == null || sprite == null)
+            return;
+
+        float faceInSprite = HEX_WORLD_W * sprite.pixelsPerUnit;   // hex face, in sprite pixels
+        float scale = FACE_PX / faceInSprite;
+
+        RectTransform rt = img.rectTransform;
+        rt.sizeDelta = sprite.rect.size * scale;
+
+        // slide the sprite so its pivot (the hex face centre) lands on the slot centre
+        Vector2 middle = sprite.rect.size * 0.5f;
+        rt.anchoredPosition = (middle - sprite.pivot) * scale;
+    }
+
     public void OnDrop(PointerEventData eventData)
     {
         if (centerHex || hex.Labor != null)
@@ -72,6 +97,8 @@ public class TerrainSlot : MonoBehaviour, IDropHandler
 
         unitDrag.LandUnit.UnitStatus = UnitStatus.WorkInField;
         hex.Labor = unitDrag.LandUnit;
+
+        uiMgr.SelectProfession(this);
     }
 
     public void HexSlotInit(Hex hexData)
@@ -80,18 +107,154 @@ public class TerrainSlot : MonoBehaviour, IDropHandler
         {
             hex = hexData;
             terrainImage.sprite = hex.TerrainSprite.sprite;
+            FitHexImage(terrainImage, terrainImage.sprite);
+            SetupNormalYield();
 
             if (hex.HasForest)
             {
                 forestImage.sprite = hex.ForestSprite.sprite;
+                FitHexImage(forestImage, forestImage.sprite);
                 forestImage.gameObject.SetActive(true);
             }
+            else
+                forestImage.gameObject.SetActive(false);
 
             if (hex.HasTown)
             {
                 townImage.sprite = hex.Town.TownSprite.sprite;
+                FitHexImage(townImage, townImage.sprite);
                 townImage.gameObject.SetActive(true);
             }
+            else
+                townImage.gameObject.SetActive(false);
         }
+    }
+
+    // 34.20 : fur and lumber only exist while the hex is forested; farming loses 2 to the canopy
+    private void SetupNormalYield()
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            normalYield[i] = hex.ResourceYield[i];
+
+            if (i == 4 || i == 5) //Fur or Lumber
+            {
+                if (!hex.HasForest)
+                    normalYield[i] = 0;
+            }
+            else //Agriculture
+            {
+                if (hex.HasForest)
+                    normalYield[i] -= 2; //Reduce agriculture
+            }
+
+            if (hex.HasTown)
+                normalYield[i] = Mathf.CeilToInt(normalYield[i] / 2f);
+
+            if (normalYield[i] < 0)
+                normalYield[i] = 0;
+        }
+    }
+
+    public GameObject GenerateYieldIcon(int i)
+    {
+        GameObject yieldObj = Instantiate(uiMgr.YieldIconPrefab, yieldParent);
+        Image iconImg = yieldObj.GetComponent<Image>();
+
+        iconImg.sprite = gameMgr.ProductData[i].icons[0];
+
+        if (i == 0)
+        {
+            if (hex.HexType == HexType.Ocean)
+                iconImg.sprite = gameMgr.ProductData[0].icons[1];
+            else
+                iconImg.sprite = gameMgr.ProductData[0].icons[0];
+        }
+
+        return yieldObj;
+    }
+
+    private void SetupParentSpacing(int n)
+    {
+        if (n <= 1)
+            return;
+
+        HorizontalLayoutGroup layout = yieldParent.GetComponent<HorizontalLayoutGroup>();
+        //100 is Icon width
+        //256 is Parent width
+        int totalWidth = 100 * n;
+        int excessWidth = totalWidth - 256;
+
+        if (excessWidth <= 0)
+            return;
+
+        int result = excessWidth / (n - 1);
+        layout.spacing = -result;
+    }
+
+    public void GenerateYieldIcons(int id)
+    {
+        yieldText.text = actualYield[id].ToString();
+        yieldText.gameObject.SetActive(true);
+
+        for (int i = 0; i < actualYield[id]; i++)
+        {
+            GameObject iconobj = GenerateYieldIcon(id);
+            yieldIconList.Add(iconobj);
+        }
+        SetupParentSpacing(actualYield[id]);
+    }
+
+    public void ConvertNormalToActualYield(int id)
+    {
+        if (hex.YieldID == -1)
+            return;
+
+        //Formula to Adjust NormalYield *
+
+        //convert normal Yield to actual yield
+        actualYield[id] = normalYield[id];
+    }
+
+    public void AdjustActualYieldAndAccumulate()
+    {
+        ConvertNormalToActualYield(hex.YieldID);
+
+        //accumulate actual yield to total production
+        gameMgr.CurTown.TotalYieldThisTurn[hex.YieldID] += actualYield[hex.YieldID];
+
+        //generate all yield icons in one hex
+        GenerateYieldIcons(hex.YieldID);
+    }
+
+    public void ReduceTownYield()
+    {
+        if (hex.YieldID != -1)
+        {
+            gameMgr.CurTown.TotalYieldThisTurn[hex.YieldID] -= actualYield[hex.YieldID];
+            actualYield[hex.YieldID] = 0;
+        }
+    }
+
+    public void RemoveYieldIcons()
+    {
+        foreach (GameObject obj in yieldIconList)
+        {
+            Destroy(obj);
+        }
+        yieldIconList.Clear();
+        yieldText.gameObject.SetActive(false);
+
+        ReduceTownYield();
+
+        if (hex != null && hex.YieldID == 0)
+            uiMgr.UpdateTotalFoodIcons();
+    }
+
+    // 34.18 : chosen from the profession dialog
+    public void SelectYield(int i)
+    {
+        hex.YieldID = i;
+        AdjustActualYieldAndAccumulate();
     }
 }

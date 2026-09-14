@@ -50,6 +50,8 @@ public class UnitDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         if (terrainSlot != null)
         {
             terrainSlot.Hex.Labor = null;
+            terrainSlot.RemoveYieldIcons();
+            terrainSlot.Hex.YieldID = -1;//no yield for this hex
             terrainSlot = null;
         }
     }

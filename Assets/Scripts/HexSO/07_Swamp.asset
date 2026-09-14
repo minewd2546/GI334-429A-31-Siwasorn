@@ -18,5 +18,5 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 0a57d91dab9783643ac715b1e425733b, type: 3}
   forestSprites:
   - {fileID: 21300000, guid: caabcdf39b538854791410dbf4cc18d4, type: 3}
-  resourceYield: 
+  resourceYield: 0200000002000000000000000000000001000000050000000100000000000000
   moveCost: 2
