@@ -17,6 +17,6 @@ MonoBehaviour:
   strength: 24
   movePointMax: 5
   visualRange: 1
-  shipIcon: {fileID: 21300000, guid: 64014fbbc8addf8418be567239ac37f7, type: 3}
+  shipIcon: {fileID: 21300000, guid: be3adb77c85ebcb4ea211a4c63aae315, type: 3}
   armed: 1
   cargoHoldNum: 6

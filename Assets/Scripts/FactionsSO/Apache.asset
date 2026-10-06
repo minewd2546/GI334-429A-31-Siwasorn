@@ -17,4 +17,4 @@ MonoBehaviour:
   flagIcon: {fileID: 21300000, guid: 5533176970059b24cad18ac290f359b9, type: 3}
   shieldIcon: {fileID: 21300000, guid: 12deb23c94fb39e4a833c10bd443085d, type: 3}
   unitIcon: {fileID: 0}
-  townIcon: {fileID: 21300000, guid: 68a910725a05b8a4f8a9a945938a73b3, type: 3}
+  townIcon: {fileID: 5696761008592585250, guid: 9602ef3e066ca4849b4493ef70c8f86d, type: 3}

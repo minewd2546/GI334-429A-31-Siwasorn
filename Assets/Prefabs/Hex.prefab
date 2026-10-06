@@ -16,7 +16,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &6488887526509260017
 Transform:
   m_ObjectHideFlags: 0
@@ -338,6 +338,10 @@ MonoBehaviour:
   hexName: 
   resourceYield: 
   specialHex: 0
+  town: {fileID: 0}
+  unitsInHex: []
+  labor: {fileID: 0}
+  yieldId: -1
   hasTown: 0
   moveCost: 1
   visible: 0
@@ -611,7 +615,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &1984791545214911991
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -645,7 +649,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &7657200070621974124
 Transform:
   m_ObjectHideFlags: 0
@@ -655,8 +659,8 @@ Transform:
   m_GameObject: {fileID: 8371536913483595175}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0.033, z: 0}
+  m_LocalScale: {x: 0.98424387, y: 0.99518, z: 0.8226938}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5096775149079614177}
