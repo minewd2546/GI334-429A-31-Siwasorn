@@ -29,6 +29,10 @@ public class Faction : MonoBehaviour
     public bool IsEuropean { get { return isEuropean; } }
 
     [SerializeField]
+    private int gold; //the nation's treasury
+    public int Gold { get { return gold; } set { gold = value; } }
+
+    [SerializeField]
     private Transform townParent;
     public Transform TownParent { get { return townParent; } }
 
@@ -53,6 +57,10 @@ public class Faction : MonoBehaviour
     public Sprite TownIcon { get { return townIcon; } }
 
     [SerializeField]
+    private string[] townNames; //historical colony names, in founding order
+    public string[] TownNames { get { return townNames; } }
+
+    [SerializeField]
     private List<Town> towns = new List<Town>();
     public List<Town> Towns { get { return towns; } set { towns = value; } }
 
@@ -64,6 +72,8 @@ public class Faction : MonoBehaviour
     {
         nation = data.nation;
         isEuropean = data.isEuropean;
+        gold = data.startingGold;
+        townNames = data.townNames;
         flagIcon = data.flagIcon;
         shieldIcon = data.shieldIcon;
         unitIcon = data.unitIcon;

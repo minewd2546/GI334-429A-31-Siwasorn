@@ -55,8 +55,7 @@ public class AIManager : MonoBehaviour
         //Debug.Log("Release Mouse");
         //Debug.Log("New Turn");
 
-        GameManager.instance.PlayerTurn = true;
-        GameManager.instance.SelectPlayerFirstUnit();
+        GameManager.instance.StartNewTurn();
     }
 
     public void StartAITurn()

@@ -18,3 +18,15 @@ MonoBehaviour:
   shieldIcon: {fileID: 21300000, guid: 8bf3dbbe54fc25947bdb6c64ccafc8ad, type: 3}
   unitIcon: {fileID: 0}
   townIcon: {fileID: 21300000, guid: 68a910725a05b8a4f8a9a945938a73b3, type: 3}
+  startingGold: 0
+  townNames:
+  - Jamestown
+  - Plymouth
+  - Boston
+  - Providence
+  - Hartford
+  - New Haven
+  - Charles Town
+  - Philadelphia
+  - Baltimore
+  - Savannah

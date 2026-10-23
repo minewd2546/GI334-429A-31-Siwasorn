@@ -18,3 +18,15 @@ MonoBehaviour:
   shieldIcon: {fileID: 21300000, guid: 72223a6d43aaad1429a74b09ff528ade, type: 3}
   unitIcon: {fileID: 0}
   townIcon: {fileID: 21300000, guid: 68a910725a05b8a4f8a9a945938a73b3, type: 3}
+  startingGold: 0
+  townNames:
+  - Port Royal
+  - Quebec
+  - Trois-Rivieres
+  - Montreal
+  - Cayenne
+  - Biloxi
+  - Mobile
+  - Detroit
+  - New Orleans
+  - Saint Louis

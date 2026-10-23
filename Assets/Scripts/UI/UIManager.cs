@@ -55,6 +55,19 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private List<GameObject> foodIconList = new List<GameObject>();
 
+    [SerializeField]
+    private StockSlot[] stockSlots;
+
+    [Header("Name Panel")]
+    [SerializeField]
+    private TMP_Text townNameText;
+
+    [SerializeField]
+    private TMP_Text yearText;
+
+    [SerializeField]
+    private TMP_Text goldText;
+
     void Awake()
     {
         instance = this;
@@ -63,6 +76,12 @@ public class UIManager : MonoBehaviour
     public void SetupHexSlots(Hex centerHex, Hex[] aroundHexes)
     {
         centerSlot.HexSlotInit(centerHex);
+
+        //setup auto Food production on CenterSlot
+        if (centerSlot.Hex.YieldID == -1)
+            centerSlot.SelectYield(0); //Change to Food
+        else
+            centerSlot.AdjustActualYield(); //Already Food
 
         for (int i = 0; i < areaSlots.Length; i++)
         {
@@ -126,11 +145,44 @@ public class UIManager : MonoBehaviour
 
     public void SetupCurrentTown(Hex curHex, Hex[] aroundHexes)
     {
+        UpdateNamePanel(curHex.Town);
         SetupHexSlots(curHex, aroundHexes);
         SetupUnitDragOutsideTown(curHex);
         SetupUnitDragWorkingInTerrain();
         SetupYieldInTerrain();
         UpdateTotalFoodIcons();
+        SetupStockSlots(curHex);
+    }
+
+    public void SetupStockSlots(Hex hex)
+    {
+        for (int i = 0; i < stockSlots.Length; i++)
+        {
+            stockSlots[i].stockInit(i, hex.Town);
+        }
+    }
+
+    //town name, year and the nation's treasury along the top strip
+    public void UpdateNamePanel(Town town)
+    {
+        if (townNameText != null)
+            townNameText.text = (town != null) ? town.TownName : string.Empty;
+
+        if (yearText != null)
+            yearText.text = GameManager.instance.GameYear.ToString();
+
+        if (goldText != null)
+        {
+            Faction faction = (town != null) ? town.Faction : GameManager.instance.PlayerFaction;
+            goldText.text = (faction != null) ? faction.Gold + " Gold" : string.Empty;
+        }
+    }
+
+    // 38.21 : ending the turn with the town open should close it
+    public void CheckActiveUIPanel()
+    {
+        if (townPanel.activeInHierarchy)
+            ToggleTownPanel(false);
     }
 
     public void ToggleTownPanel(bool show)
@@ -153,7 +205,9 @@ public class UIManager : MonoBehaviour
 
             if (terrainSlot.Hex.Labor != null && terrainSlot.Hex.YieldID != -1)
             {
-                terrainSlot.AdjustActualYieldAndAccumulate();
+                //re-opening the town only redraws the icons; the yield was already
+                //accumulated when the worker was placed (38.27)
+                terrainSlot.AdjustActualYield();
             }
         }
     }
@@ -222,16 +276,15 @@ public class UIManager : MonoBehaviour
     }
 
     // ---------------- 35.6 : the town's total food for this turn ----------------
-    private void SetupParentSpacing(int n)
+    public void SetupParentSpacing(int n, Transform parent, int iconWidth, int parentWidth)
     {
         if (n <= 1)
             return;
 
-        HorizontalLayoutGroup layout = foodParent.GetComponent<HorizontalLayoutGroup>();
-        //100 is Icon width
-        //300 is Parent width
-        int totalWidth = 100 * n;
-        int excessWidth = totalWidth - 300;
+        HorizontalLayoutGroup layout = parent.GetComponent<HorizontalLayoutGroup>();
+
+        int totalWidth = iconWidth * n;
+        int excessWidth = totalWidth - parentWidth;
 
         if (excessWidth <= 0)
             return;
@@ -267,6 +320,6 @@ public class UIManager : MonoBehaviour
             GameObject iconobj = GenerateFoodIcon();
             foodIconList.Add(iconobj);
         }
-        SetupParentSpacing(total);
+        SetupParentSpacing(total, foodParent, 64, 300);
     }
 }

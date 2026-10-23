@@ -1,7 +1,12 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Town : MonoBehaviour
 {
+    [SerializeField]
+    protected string townName;
+    public string TownName { get { return townName; } set { townName = value; } }
+
     [SerializeField]
     protected Faction faction;
     public Faction Faction { get { return faction; } }
@@ -50,6 +55,41 @@ public class Town : MonoBehaviour
 
     [SerializeField]
     protected GameManager gameManager;
+
+    private void OnMouseDown()
+    {
+        if (faction == gameManager.PlayerFaction)
+            gameManager.SetupCurrentTown(this);
+    }
+
+    // the manual uses Input.GetMouseButtonDown(1); this project is on the new Input System
+    public void OnMouseOver()
+    {
+        if (Mouse.current.rightButton.wasPressedThisFrame)
+        {
+            //Debug.Log($"To Move Hex:{curHex.X}, {curHex.Y}");
+            if (gameManager.CheckIfHexIsAdjacent(gameManager.CurUnit.CurHex, curHex))
+            {
+                if (faction == gameManager.PlayerFaction)//same side unit
+                {
+                    //Debug.Log("True");
+                    gameManager.CurUnit.PrepareMoveToHex(curHex);
+                }
+                else//diff side unit
+                {
+                    //Debug.Log($"{gameManager.CurUnit} Attacks {townName}");
+                }
+            }
+        }
+    }
+
+    public void AccumulateToWarehouse()
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            warehouse[i] += totalYieldThisTurn[i];
+        }
+    }
 
     public void TownInit(GameManager gameMgr, Faction fact)
     {

@@ -102,6 +102,13 @@ public class GameManager : MonoBehaviour
     public int GameTurn { get { return gameTurn; } set { gameTurn = value; } }
 
     [SerializeField]
+    private int startYear = 1492; //Columbus reaches the New World
+    public int StartYear { get { return startYear; } }
+
+    //one turn is one year, so turn 1 is 1492
+    public int GameYear { get { return startYear + gameTurn - 1; } }
+
+    [SerializeField]
     private int nativeTownNum;
 
     public static GameManager instance;
@@ -373,11 +380,16 @@ public class GameManager : MonoBehaviour
                 curUnit.gameObject.SetActive(false);
         }
 
-        unit.gameObject.SetActive(true);
+        if (unit.UnitStatus != UnitStatus.WorkInField)
+        {
+            unit.gameObject.SetActive(true);
+            unit.SetUnitToFrontLayerOrder();
+        }
 
         curUnit = unit;
-        //UpdateCanGoHex();
+        CameraController.instance.MoveCamera(curUnit.transform.position);
 
+        HideOtherLandUnits(curUnit);
         FocusPlayerUnit(curUnit);
         //Debug.Log(curUnit);
     }
@@ -388,12 +400,25 @@ public class GameManager : MonoBehaviour
         Town town = obj.GetComponent<Town>();
 
         town.TownInit(this, faction);
+        town.TownName = NextTownName(faction);
         town.CurHex = curHex;
         town.CurPos = town.CurHex.Pos;
         faction.Towns.Add(town);
 
         curHex.HasTown = true;
         curHex.Town = town;
+    }
+
+    //names come from the faction's historical colony list, in founding order
+    private string NextTownName(Faction faction)
+    {
+        string[] pool = faction.TownNames;
+        int i = faction.Towns.Count; //this town has not been added to the list yet
+
+        if (pool != null && i < pool.Length && !string.IsNullOrEmpty(pool[i]))
+            return pool[i];
+
+        return faction.Nation + " Colony " + (i + 1);
     }
 
     private void GenerateAllNativeTowns()
@@ -461,6 +486,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    //38.24 : keep stacked land units from overlapping when one is selected
+    public void HideOtherLandUnits(Unit thisUnit)
+    {
+        foreach (Unit other in thisUnit.CurHex.UnitsInHex)
+        {
+            if (other.UnitType == UnitType.Land && other.Faction == playerFaction)
+            {
+                if (other != thisUnit)
+                    other.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    public void AccumulateStockAllTowns()
+    {
+        for (int i = 0; i < factions.Length; i++)
+        {
+            for (int j = 0; j < factions[i].Towns.Count; j++)
+            {
+                factions[i].Towns[j].AccumulateToWarehouse();
+            }
+        }
+    }
+
+    public void StartNewTurn()
+    {
+        playerTurn = true;
+        SelectPlayerFirstUnit();
+        AccumulateStockAllTowns();
+    }
+
     public void ResetAllUnits(Faction faction)
     {
         foreach (Unit unit in faction.Units)
@@ -499,6 +555,8 @@ public class GameManager : MonoBehaviour
     {
         if (curUnit != null)
             curUnit.ToggleBorder(false, Color.green);
+
+        UIManager.instance.CheckActiveUIPanel();
 
         Debug.Log("End Turn");
         playerTurn = false;
@@ -564,7 +622,6 @@ public class GameManager : MonoBehaviour
             i = 0;
 
         SelectPlayerUnit(playerFaction.Units[i]);
-        CameraController.instance.MoveCamera(curUnit.transform.position);
     }
 
     private void ToggleHexText()
