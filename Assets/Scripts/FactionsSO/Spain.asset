@@ -18,6 +18,7 @@ MonoBehaviour:
   shieldIcon: {fileID: 21300000, guid: 47f5edac5184433449c7ef408ac3cd72, type: 3}
   unitIcon: {fileID: 0}
   townIcon: {fileID: 21300000, guid: 68a910725a05b8a4f8a9a945938a73b3, type: 3}
+  leaderSprite: {fileID: -141075555, guid: 0b87d6f175d458d4dafc6608409fad11, type: 3}
   startingGold: 0
   townNames:
   - Santo Domingo

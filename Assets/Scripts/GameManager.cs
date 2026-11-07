@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -73,6 +74,9 @@ public class GameManager : MonoBehaviour
     private Unit curUnit;
     public Unit CurUnit { get { return curUnit; } set { curUnit = value; } }
 
+    //false when the selected unit has died or has sailed to Europe
+    public bool HasCurUnitOnMap { get { return curUnit != null && curUnit.CurHex != null; } }
+
     [SerializeField]
     private ProductData[] productData;
     public ProductData[] ProductData { get { return productData; } }
@@ -109,7 +113,24 @@ public class GameManager : MonoBehaviour
     public int GameYear { get { return startYear + gameTurn - 1; } }
 
     [SerializeField]
+    private int year = 1600;
+    public int Year { get { return year; } set { year = value; } }
+
+    [SerializeField]
     private int nativeTownNum;
+
+    [SerializeField]
+    private Unit winner;
+
+    [SerializeField]
+    private Unit loser;
+
+    [SerializeField]
+    private bool inCombat; //one fight at a time; clicks during the 4 second wait are ignored
+
+    [SerializeField]
+    private Faction curForeignFaction; //cur Faction that player's meeting
+    public Faction CurForeignFaction { get { return curForeignFaction; } set { curForeignFaction = value; } }
 
     public static GameManager instance;
 
@@ -134,6 +155,7 @@ public class GameManager : MonoBehaviour
         GenerateAllNativeUnits();
 
         FocusStartingUnit();
+        ShowFirstKingDialogText();
     }
 
     // Update is called once per frame
@@ -150,6 +172,9 @@ public class GameManager : MonoBehaviour
             if (playerTurn)
                 Endturn();
         }
+
+        if (Keyboard.current.eKey.wasPressedThisFrame)
+            EuropePanel();
     }
 
     private void DetermineOcean()
@@ -259,10 +284,57 @@ public class GameManager : MonoBehaviour
         playerFaction = factions[i];
     }
 
-    private void GenerateEuropeanShip(Faction faction)
+    private Hex FindNearestLandHexToLand(int y)
     {
-        int x = WIDTH - 1; //near right edge of a map
+        int min = oceanEdgeIndex - 3;
+        int max = oceanEdgeIndex + 4;
+
+        Hex destHex = null;
+
+        for (int x = min; x <= max; x++)
+        {
+            //Debug.Log($"checking:{x},{y}");
+            if (allHexes[x, y].HexType != HexType.Ocean)
+            {
+                //Debug.Log($"found:{x},{y}");
+                destHex = allHexes[x, y];
+            }
+        }
+        return destHex;
+    }
+
+    private void MoveEuropeanShip(NavalUnit ship)
+    {
+        int x = WIDTH - 2; //near right edge of a map
         int y = Random.Range(0, HEIGHT);
+        Hex hex = allHexes[x, y];
+
+        Debug.Log($"Position: {hex.Pos}");
+
+        ship.SetupPosition(hex);
+        ship.gameObject.SetActive(true);
+        ship.gameObject.transform.position = ship.CurPos;
+
+        //passengers boarded in Europe still point at their old hex
+        foreach (LandUnit passenger in ship.Passengers)
+        {
+            if (passenger.CurHex != null)
+                passenger.CurHex.UnitsInHex.Remove(passenger);
+
+            passenger.SetupPosition(hex);
+            passenger.transform.position = hex.Pos;
+        }
+
+        ClearDarkFogAroundUnit(ship);
+        SelectPlayerUnit(ship);
+        CameraController.instance.MoveCamera(ship.CurPos);
+        ship.Visible = true;
+    }
+
+    private void GenerateEuropeanShip(Faction faction, int yPos)
+    {
+        int x = WIDTH - 2; //near right edge of a map
+        int y = yPos;
         Hex hex = allHexes[x, y];
 
         GameObject obj = Instantiate(navalUnitPrefab, hex.Pos, Quaternion.identity, faction.UnitParent);
@@ -271,13 +343,58 @@ public class GameManager : MonoBehaviour
         ship.UnitInit(this, faction, navalUnitData[0]); //Caravel
         ship.SetupPosition(hex);
         faction.Units.Add(ship); //First Unit of European nations is a ship
+
+        if (faction == playerFaction)
+        {
+            ClearDarkFogAroundUnit(ship);
+            SelectPlayerUnit(ship);
+            CameraController.instance.MoveCamera(ship.CurPos);
+            ship.Visible = true;
+        }
+        else
+        {
+            Hex destinationHex = FindNearestLandHexToLand(yPos);
+            if (destinationHex != null)
+                ship.SetUnitDestination(destinationHex);
+        }
     }
 
     private void GenerateAllEuropeanShips()
     {
+        int interval = HEIGHT / 5;
+        int n = HEIGHT;
+
+        List<int> spots = new List<int>();
+
         for (int i = 0; i < 5; i++)
         {
-            GenerateEuropeanShip(factions[i]);
+            n -= Random.Range(5, interval);
+            spots.Add(n);
+        }
+
+        for (int i = 0; i < 5; i++)
+        {
+            int index = Random.Range(0, spots.Count);
+            int yPosition = spots[index];
+            spots.RemoveAt(index);
+
+            GenerateEuropeanShip(factions[i], yPosition);
+        }
+    }
+
+    public void CheckToGenerateShipFromEurope(NavalUnit ship)
+    {
+        int y = Random.Range(0, HEIGHT);
+
+        if (!playerFaction.Units.Contains(ship))
+        {
+            Debug.Log("New Ship");
+            GenerateEuropeanShip(playerFaction, y);
+        }
+        else
+        {
+            Debug.Log("Old Ship");
+            MoveEuropeanShip(ship);
         }
     }
 
@@ -286,7 +403,7 @@ public class GameManager : MonoBehaviour
         GameObject obj = Instantiate(landUnitPrefab, hex.Pos, Quaternion.identity, ship.PassengerParent.transform);
         LandUnit unit = obj.GetComponent<LandUnit>();
 
-        unit.UnitInit(this, faction, landUnitData[unitId]);
+        unit.UnitInit(this, UIManager.instance, faction, landUnitData[unitId]);
         unit.SetupPosition(hex);
 
         unit.UnitStatus = UnitStatus.OnBoard;
@@ -361,10 +478,32 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    //units in Europe or sailing the Atlantic stay in faction.Units but are not on Map01
+    public bool IsUnitOnMap(Unit unit)
+    {
+        if (unit.CurHex == null || unit.UnitStatus == UnitStatus.Hidden)
+            return false;
+
+        if (unit.UnitType == UnitType.Land)
+        {
+            LandUnit landUnit = (LandUnit)unit;
+
+            if (EuropeManager.instance.LandUnitsInEurope.Contains(landUnit))
+                return false;
+
+            if (landUnit.UnitStatus == UnitStatus.OnBoard && landUnit.TransportShip != null)
+                return IsUnitOnMap(landUnit.TransportShip);
+        }
+        return true;
+    }
+
     public void ClearDarkFogAroundEveryUnit(Faction faction)
     {
         foreach (Unit unit in faction.Units)
         {
+            if (!IsUnitOnMap(unit))
+                continue;
+
             //Debug.Log($"{unit.UnitName} discovers:");
             ClearDarkFogAroundUnit(unit);
         }
@@ -375,12 +514,13 @@ public class GameManager : MonoBehaviour
         if (curUnit != null)
         {
             ClearToggleBorder(curUnit);
+            curUnit.SetUnitToNormalLayerOrder();
 
             if (curUnit.UnitStatus == UnitStatus.OnBoard)
                 curUnit.gameObject.SetActive(false);
         }
 
-        if (unit.UnitStatus != UnitStatus.WorkInField)
+        if (unit.UnitType == UnitType.Land && unit.UnitStatus != UnitStatus.WorkInField)
         {
             unit.gameObject.SetActive(true);
             unit.SetUnitToFrontLayerOrder();
@@ -450,7 +590,7 @@ public class GameManager : MonoBehaviour
         GameObject obj = Instantiate(landUnitPrefab, hex.Pos, Quaternion.identity, faction.UnitParent);
         LandUnit unit = obj.GetComponent<LandUnit>();
 
-        unit.UnitInit(this, faction, landUnitData[unitId]);
+        unit.UnitInit(this, UIManager.instance, faction, landUnitData[unitId]);
         unit.SetupPosition(hex);
         unit.ShowHideSprite(show);
 
@@ -489,6 +629,9 @@ public class GameManager : MonoBehaviour
     //38.24 : keep stacked land units from overlapping when one is selected
     public void HideOtherLandUnits(Unit thisUnit)
     {
+        if (thisUnit.CurHex == null)
+            return;
+
         foreach (Unit other in thisUnit.CurHex.UnitsInHex)
         {
             if (other.UnitType == UnitType.Land && other.Faction == playerFaction)
@@ -543,11 +686,14 @@ public class GameManager : MonoBehaviour
 
     public void SelectPlayerFirstUnit()
     {
-        if (playerFaction.Units.Count > 0)
+        foreach (Unit firstUnit in playerFaction.Units)
         {
-            Unit firstUnit = playerFaction.Units[0];
-            SelectPlayerUnit(firstUnit);
-            CameraController.instance.MoveCamera(firstUnit.CurPos);
+            if (IsUnitOnMap(firstUnit))
+            {
+                SelectPlayerUnit(firstUnit);
+                CameraController.instance.MoveCamera(firstUnit.CurPos);
+                return;
+            }
         }
     }
 
@@ -557,6 +703,7 @@ public class GameManager : MonoBehaviour
             curUnit.ToggleBorder(false, Color.green);
 
         UIManager.instance.CheckActiveUIPanel();
+        EuropeManager.instance.UpdateShipInTransitTurn();
 
         Debug.Log("End Turn");
         playerTurn = false;
@@ -616,12 +763,245 @@ public class GameManager : MonoBehaviour
     private void SelectNextPlayerUnit()
     {
         int i = FindIndexOfCurUnit();
-        i++;
 
-        if (i >= playerFaction.Units.Count)
-            i = 0;
+        for (int step = 0; step < playerFaction.Units.Count; step++)
+        {
+            i++;
 
-        SelectPlayerUnit(playerFaction.Units[i]);
+            if (i >= playerFaction.Units.Count)
+                i = 0;
+
+            if (IsUnitOnMap(playerFaction.Units[i]))
+            {
+                SelectPlayerUnit(playerFaction.Units[i]);
+                return;
+            }
+        }
+    }
+
+    public void EuropePanel()
+    {
+        UIManager.instance.CheckEuropePanel();
+    }
+
+    public void CheckShipToEurope()
+    {
+        //Debug.Log("Checking Ship");
+        foreach (Unit unit in playerFaction.Units)
+        {
+            if (unit.UnitType == UnitType.Naval && unit.CurHex != null)
+            {
+                if (unit.CurHex.X == WIDTH - 1)
+                {
+                    NavalUnit ship = (NavalUnit)unit;
+                    CameraController.instance.MoveCamera(unit.CurPos);
+
+                    //Debug.Log("Go to Europe?");
+                    EuropeManager.instance.QuestionGoToEurope(ship);
+                }
+            }
+        }
+    }
+
+    // ---------------- 45 : buying ships (the manual's 45.14 prints the land unit code instead) ----------------
+    public bool CheckShipPriceAndMoney(int i)
+    {
+        if (playerFaction.Money < navalUnitData[i].price)
+            return false;
+        else
+            return true;
+    }
+
+    //Ship bought from Europe: it has no hex until it sails to the New World
+    public NavalUnit GenerateHiddenShip(int id)
+    {
+        Hex hex = allHexes[0, 0];
+
+        GameObject obj = Instantiate(navalUnitPrefab, hex.Pos, Quaternion.identity, playerFaction.UnitParent);
+        NavalUnit ship = obj.GetComponent<NavalUnit>();
+
+        ship.UnitInit(this, playerFaction, navalUnitData[id]);
+        playerFaction.Units.Add(ship);
+
+        return ship;
+    }
+
+    public void PayShipPrice(int i)
+    {
+        playerFaction.Money -= navalUnitData[i].price;
+    }
+
+    // ---------------- 46 : training land units ----------------
+    public bool CheckLandUnitPriceAndMoney(int i)
+    {
+        if (playerFaction.Money < landUnitData[i].price)
+            return false;
+        else
+            return true;
+    }
+
+    //Land Unit bought from Europe in Map01 as hidden land unit at x, y (0, 0)
+    public LandUnit GenerateHiddenLandUnit(int id)
+    {
+        Hex hex = allHexes[0, 0];
+
+        GameObject obj = Instantiate(landUnitPrefab, hex.Pos, Quaternion.identity, playerFaction.UnitParent);
+        LandUnit unit = obj.GetComponent<LandUnit>();
+
+        unit.UnitInit(this, UIManager.instance, playerFaction, landUnitData[id]);
+        unit.SetupPosition(hex);
+        playerFaction.Units.Add(unit);
+        unit.UnitStatus = UnitStatus.Hidden;
+
+        return unit;
+    }
+
+    public void PayUnitPrice(int i)
+    {
+        playerFaction.Money -= landUnitData[i].price;
+    }
+
+    //the manual calls this from UIManager.CheckShipArriveWithPassenger but gives no code
+    public void CheckPassengerArriving(NavalUnit ship, Hex hex, Faction faction)
+    {
+        foreach (LandUnit passenger in ship.Passengers)
+        {
+            passenger.UnitStatus = UnitStatus.None;
+            passenger.TransportShip = null;
+            passenger.transform.parent = faction.UnitParent;
+            passenger.transform.position = hex.Pos;
+        }
+        ship.Passengers.Clear();
+    }
+
+    // ---------------- 43.28 : combat ----------------
+    private IEnumerator ShowCasualtyReportWait(float seconds)
+    {
+        //attacking animation
+        yield return new WaitForSeconds(seconds);
+        Debug.Log("Show Combat Dialog");
+        DialogManager.instance.ToggleCombatPanel(true);
+    }
+
+    private void CalculateCombatLogic(Unit ourUnit, Unit enemyUnit)
+    {
+        if (ourUnit.Strength > enemyUnit.Strength)
+        {
+            winner = ourUnit;
+            loser = enemyUnit;
+        }
+        else if (ourUnit.Strength < enemyUnit.Strength)
+        {
+            winner = enemyUnit;
+            loser = ourUnit;
+        }
+        else//draw
+        {
+            int n = Random.Range(0, 2);
+
+            if (n == 0)
+            {
+                winner = ourUnit;
+                loser = enemyUnit;
+            }
+            else
+            {
+                winner = enemyUnit;
+                loser = ourUnit;
+            }
+        }
+    }
+
+    public void SetupDeadUnit(Unit deadUnit)
+    {
+        Faction faction = deadUnit.Faction;
+        Hex hex = deadUnit.CurHex;
+        bool lostCurUnit = (deadUnit == curUnit);
+
+        if (deadUnit.UnitType == UnitType.Naval)
+        {
+            NavalUnit ship = (NavalUnit)deadUnit;
+
+            foreach (LandUnit passenger in ship.Passengers)
+            {
+                if (hex.UnitsInHex.Contains(passenger))
+                    hex.UnitsInHex.Remove(passenger);
+
+                if (passenger == curUnit)
+                    lostCurUnit = true;
+
+                faction.Units.Remove(passenger);
+                Destroy(passenger.gameObject);
+            }
+        }
+
+        if (hex.UnitsInHex.Contains(deadUnit))
+            hex.UnitsInHex.Remove(deadUnit);
+
+        faction.Units.Remove(deadUnit);
+        Destroy(deadUnit.gameObject);
+
+        if (lostCurUnit)
+        {
+            curUnit = null;
+            SelectPlayerFirstUnit();
+        }
+    }
+
+    private IEnumerator ShowUnitDies(float seconds, Unit winner, Unit loser)
+    {
+        yield return new WaitForSeconds(seconds);
+        Debug.Log("Hide Combat Dialog");
+        DialogManager.instance.ToggleCombatPanel(false);
+
+        //loser dies animation
+        Debug.Log("Animation");
+
+        SetupDeadUnit(loser);
+        ShowMilitaryResultDialog();
+        inCombat = false;
+    }
+
+    private void ShowMilitaryResultDialog()
+    {
+        DialogManager.instance.ShowCombatResult(winner, loser);
+    }
+
+    public void StartCombat(Unit attacker, Unit defender)
+    {
+        if (inCombat)
+            return;
+
+        inCombat = true;
+
+        DialogManager.instance.CombatAnalysisInit(attacker, defender);
+        StartCoroutine(ShowCasualtyReportWait(0.5f));
+
+        CalculateCombatLogic(attacker, defender);
+
+        StartCoroutine(ShowUnitDies(4f, winner, loser));
+    }
+
+    // ---------------- 44 : dialogs ----------------
+    public void ShowFirstKingDialogText()
+    {
+        DialogManager.instance.ShowFirstKingQuestDialogText();
+    }
+
+    public bool CheckIfAroundHexHasTown(Hex hex)
+    {
+        return HexCalculator.CheckIfHexAroundHasTown(allHexes, hex);
+    }
+
+    public void CheckUnmetFaction(Unit unit)
+    {
+        Faction faction = HexCalculator.CheckNeverMetFaction(allHexes, unit);
+
+        if (faction != null)
+        {
+            curForeignFaction = faction;
+            DialogManager.instance.ToggleForeignDialog(true);
+        }
     }
 
     private void ToggleHexText()

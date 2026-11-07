@@ -68,7 +68,7 @@ public class Town : MonoBehaviour
         if (Mouse.current.rightButton.wasPressedThisFrame)
         {
             //Debug.Log($"To Move Hex:{curHex.X}, {curHex.Y}");
-            if (gameManager.CheckIfHexIsAdjacent(gameManager.CurUnit.CurHex, curHex))
+            if (gameManager.HasCurUnitOnMap && gameManager.CheckIfHexIsAdjacent(gameManager.CurUnit.CurHex, curHex))
             {
                 if (faction == gameManager.PlayerFaction)//same side unit
                 {

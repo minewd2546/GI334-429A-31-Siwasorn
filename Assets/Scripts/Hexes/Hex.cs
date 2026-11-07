@@ -217,7 +217,7 @@ public class Hex : MonoBehaviour, IPointerClickHandler
         if (eventData.button == PointerEventData.InputButton.Right)
         {
             //Debug.Log($"Right Click-Hex:{x}, {y}");
-            if (gameMgr.CheckIfHexIsAdjacent(gameMgr.CurUnit.CurHex, this))
+            if (gameMgr.HasCurUnitOnMap && gameMgr.CheckIfHexIsAdjacent(gameMgr.CurUnit.CurHex, this))
             {
                 //Debug.Log("Adjacent-True");
                 gameMgr.CurUnit.PrepareMoveToHex(this);

@@ -21,3 +21,4 @@ MonoBehaviour:
   armed: 1
   hasMusket: 1
   hasHorse: 0
+  price: 1800

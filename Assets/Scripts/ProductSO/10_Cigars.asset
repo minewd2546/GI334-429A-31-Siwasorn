@@ -16,3 +16,5 @@ MonoBehaviour:
   productName: Cigars
   icons:
   - {fileID: -6576929652722830762, guid: 1d1a31f39570a59419606b424b18a022, type: 3}
+  startBid: 9
+  startAsk: 10

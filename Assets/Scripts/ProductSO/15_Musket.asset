@@ -16,3 +16,5 @@ MonoBehaviour:
   productName: Musket
   icons:
   - {fileID: -3416299932430336198, guid: 59b3056b68524444e91d4f6f94772a27, type: 3}
+  startBid: 9
+  startAsk: 12

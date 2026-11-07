@@ -21,6 +21,13 @@ public class SelectNation : MonoBehaviour
     [SerializeField]
     private Toggle defaultNationToggle; //England
 
+    [Header("Mission Steps")]
+    [SerializeField]
+    private GameObject blackPanel;
+
+    [SerializeField]
+    private GameObject[] panels; //0-KingsCommand 1-PrepareToLeave 2-LeftThePort
+
     // Toggle.onValueChanged fires for every card as the scene wakes up, including the
     // ones switching off, so whichever fires last would win. Start() runs after all of
     // them and pins the opening selection to England.
@@ -53,6 +60,24 @@ public class SelectNation : MonoBehaviour
 
         leaderPortrait.sprite = leaderPortraits[i];
         leaderPortrait.enabled = true;
+    }
+
+    public void ShowKingsCommand()
+    {
+        blackPanel.SetActive(true);
+        panels[0].SetActive(true);
+    }
+
+    public void ShowPrepareToLeave()
+    {
+        panels[0].SetActive(false);
+        panels[1].SetActive(true);
+    }
+
+    public void ShowLeftThePort()
+    {
+        panels[1].SetActive(false);
+        panels[2].SetActive(true);
     }
 
     public void StartGame()

@@ -16,3 +16,5 @@ MonoBehaviour:
   productName: Lumber
   icons:
   - {fileID: 3193741705861520411, guid: fa34f96b1c55c0645a478c8dd4c0560e, type: 3}
+  startBid: 1
+  startAsk: 3

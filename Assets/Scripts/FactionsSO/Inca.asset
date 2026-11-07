@@ -18,3 +18,6 @@ MonoBehaviour:
   shieldIcon: {fileID: 21300000, guid: bdf2b5939d3c033458833d19f12b6b3c, type: 3}
   unitIcon: {fileID: 0}
   townIcon: {fileID: -6733053964431972587, guid: e3f97f57532fb2646b67628a70b690a1, type: 3}
+  leaderSprite: {fileID: -3108402407237066577, guid: bc6ee3f925d218c458261193c9c62070, type: 3}
+  startingGold: 0
+  townNames: []

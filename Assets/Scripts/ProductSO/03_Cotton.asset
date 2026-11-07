@@ -16,3 +16,5 @@ MonoBehaviour:
   productName: Cotton
   icons:
   - {fileID: 2027391212749832444, guid: 0eac8adc4b4eeee4e9ed720c7f085efe, type: 3}
+  startBid: 2
+  startAsk: 4

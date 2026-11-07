@@ -61,12 +61,28 @@ public class Faction : MonoBehaviour
     public string[] TownNames { get { return townNames; } }
 
     [SerializeField]
+    private Sprite leaderSprite;
+    public Sprite LeaderSprite { get { return leaderSprite; } }
+
+    [SerializeField]
+    private bool metByPlayer = false;
+    public bool MetByPlayer { get { return metByPlayer; } set { metByPlayer = value; } }
+
+    [SerializeField]
+    private bool atPeaceWithPlayer = true;
+    public bool AtPeaceWithPlayer { get { return atPeaceWithPlayer; } set { atPeaceWithPlayer = value; } }
+
+    [SerializeField]
     private List<Town> towns = new List<Town>();
     public List<Town> Towns { get { return towns; } set { towns = value; } }
 
     [SerializeField]
     private List<Unit> units = new List<Unit>();
     public List<Unit> Units { get { return units; } set { units = value; } }
+
+    [SerializeField]
+    private int money = 1000;
+    public int Money { get { return money; } set { money = value; } }
 
     public void FactionInit(FactionData data)
     {
@@ -78,5 +94,6 @@ public class Faction : MonoBehaviour
         shieldIcon = data.shieldIcon;
         unitIcon = data.unitIcon;
         townIcon = data.townIcon;
+        leaderSprite = data.leaderSprite;
     }
 }

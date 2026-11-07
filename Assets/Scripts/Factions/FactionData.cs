@@ -9,6 +9,7 @@ public class FactionData : ScriptableObject
     public Sprite shieldIcon;
     public Sprite unitIcon;
     public Sprite townIcon;
+    public Sprite leaderSprite;
     public int startingGold;
     public string[] townNames; //historical colony names, used in founding order
 }

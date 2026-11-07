@@ -89,6 +89,9 @@ public class TerrainSlot : MonoBehaviour, IDropHandler
         GameObject unitObj = eventData.pointerDrag;
         UnitDrag unitDrag = unitObj.GetComponent<UnitDrag>();
 
+        if (unitDrag == null)
+            return;
+
         unitDrag.QuitOldTerrainSlot(); //old slot remove this labor
         unitDrag.WorkAtNewTerrainSlot(this); //this slot is remembered in this labor
 

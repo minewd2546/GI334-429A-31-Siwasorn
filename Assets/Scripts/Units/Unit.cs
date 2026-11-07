@@ -16,7 +16,9 @@ public enum UnitStatus
     Clearing,
     Building,
     WorkInField,
-    WorkInTown
+    WorkInTown,
+    Hidden,
+    ToBoard
 }
 
 public class Unit : MonoBehaviour, IPointerClickHandler
@@ -86,8 +88,29 @@ public class Unit : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     protected SpriteRenderer borderSprite;
 
+    [Header("Status")]
+    [SerializeField]
+    protected SpriteRenderer statusSprite;
+    public SpriteRenderer StatusSprite { get { return statusSprite; } }
+
+    [Header("Status Sprites")]
+    [SerializeField]
+    private Sprite[] statusSpritesList;
+    public Sprite[] StatusSpritesList { get { return statusSpritesList; } }
+
     [SerializeField]
     protected GameManager gameMgr;
+
+    [SerializeField]
+    protected UIManager uiMgr;
+
+    [SerializeField]
+    protected Unit targetUnit;
+    public Unit TargetUnit { get { return targetUnit; } set { targetUnit = value; } }
+
+    [SerializeField]
+    protected Hex destinationHex;
+    public Hex DestinationHex { get { return destinationHex; } set { destinationHex = value; } }
 
     // Update is called once per frame
     protected virtual void Update()
@@ -96,6 +119,16 @@ public class Unit : MonoBehaviour, IPointerClickHandler
         {
             MoveToHex();
         }
+
+        // 39.13 : moved here from LandUnit so a ship can open the town too
+        if (Keyboard.current.enterKey.wasPressedThisFrame)
+        {
+            if (this == gameMgr.CurUnit && curHex.HasTown)
+            {
+                if (curHex.Town != null)
+                    gameMgr.SetupCurrentTown(curHex.Town);
+            }
+        }
     }
 
     // the manual uses Input.GetMouseButtonDown(1); this project is on the new Input System
@@ -103,12 +136,18 @@ public class Unit : MonoBehaviour, IPointerClickHandler
     {
         if (Mouse.current.rightButton.wasPressedThisFrame)
         {
-            if (gameMgr.CheckIfHexIsAdjacent(gameMgr.CurUnit.CurHex, curHex))
+            if (gameMgr.HasCurUnitOnMap && gameMgr.CheckIfHexIsAdjacent(gameMgr.CurUnit.CurHex, curHex))
             {
                 if (faction == gameMgr.PlayerFaction)//same side unit
                     gameMgr.CurUnit.PrepareMoveToHex(curHex);
                 else//diff side unit
+                {
                     Debug.Log($"{gameMgr.CurUnit} Attacks {unitName}");
+                    if (curHex.MoveCost > movePoint)
+                        return;
+
+                    gameMgr.CurUnit.AttackUnit(curHex, this);
+                }
             }
         }
     }
@@ -169,6 +208,69 @@ public class Unit : MonoBehaviour, IPointerClickHandler
 
         if (faction == gameMgr.PlayerFaction)
             gameMgr.LeaveSeenFogAroundUnit(this);
+    }
+
+    public void AttackUnit(Hex target, Unit defender) //Begin to Attack
+    {
+        //Debug.Log($"MoveCost-{target.MoveCost}");
+        //Debug.Log($"UnitMovementP-{movePoint}");
+        //Debug.Log("Attack");
+
+        if (target.MoveCost > movePoint)
+            return;
+
+        //isMoving = true;
+        targetHex = target;
+        targetUnit = defender;
+        //Debug.Log($"Target Pos:{targetHex.transform.position.x},{targetHex.transform.position.y}");
+
+        //Attack Animation
+
+        gameMgr.StartCombat(this, defender);
+    }
+
+    public void ChangeStatusIcon()
+    {
+        if (statusSprite == null)
+            return;
+
+        switch (unitStatus)
+        {
+            case UnitStatus.Clearing:
+                statusSprite.gameObject.SetActive(true);
+                statusSprite.sprite = statusSpritesList[0];
+                break;
+            case UnitStatus.Building:
+                statusSprite.gameObject.SetActive(true);
+                statusSprite.sprite = statusSpritesList[1];
+                break;
+            default:
+                statusSprite.gameObject.SetActive(false);
+                statusSprite.sprite = null;
+                break;
+        }
+    }
+
+    public void CheckMoveToDestination()
+    {
+        if (destinationHex == null)
+            return;
+
+        Hex nextHex = null;
+
+        //Find destination hex
+        Debug.Log($"dest:{destinationHex.X}, {destinationHex.Y}");
+        nextHex = HexCalculator.FindNextHexToGo(this, CurHex, destinationHex, gameMgr.AllHexes);
+
+        if (nextHex == null)
+            return;
+
+        PrepareMoveToHex(nextHex);
+    }
+
+    public void SetUnitDestination(Hex hex)
+    {
+        destinationHex = hex;
     }
 
     protected virtual void StayOnHex(Hex targetHex)

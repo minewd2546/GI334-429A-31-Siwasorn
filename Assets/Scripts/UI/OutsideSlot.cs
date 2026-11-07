@@ -10,6 +10,10 @@ public class OutsideSlot : MonoBehaviour, IDropHandler
     {
         GameObject unitObj = eventData.pointerDrag;
         UnitDrag unitDrag = unitObj.GetComponent<UnitDrag>();
+
+        if (unitDrag == null)
+            return;
+
         unitDrag.IconParent = transform;
 
         unitDrag.QuitOldTerrainSlot(); //old slot remove this labor
